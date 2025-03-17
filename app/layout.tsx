@@ -9,10 +9,18 @@ import AppPrepare from "@/app/components/AppPrepare";
 import "./globals.css";
 
 
-export const metadata: Metadata = {
-  title: "Hivechat - Chat With All AI",
-  description: "同时和多个机器人聊天，最快获取最佳结果",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  
+  const description = locale === 'en' 
+    ? "Chai AI Web - Leading multi-model AI chat platform supporting OpenAI, Claude, Gemini, and other large language models, providing intelligent conversations, image understanding, and knowledge management for teams, making AI communication more natural, efficient, and engaging."
+    : "Chai AI Web - 领先的多模型AI聊天平台，支持OpenAI、Claude、Gemini等多种大模型，为团队提供智能对话、图像理解和知识管理，让AI交流更自然、更高效、更有趣。";
+
+  return {
+    title: "Chai AI Web",
+    description,
+  };
+}
 
 export const viewport: Viewport = {
   width: 'device-width',
