@@ -94,23 +94,26 @@ export default function LoginPage() {
           <Hivechat className="ml-1" alt="HiveChat text" width={156} height={39} />
         </Link>
       </div>
-      
-      {/* 语言切换器 */}
-      <div className="absolute top-4 right-4">
-        <Select
-          value={currentLang}
-          onChange={handleLanguageChange}
-          options={[
-            { value: 'en', label: 'English' },
-            { value: 'zh', label: '简体中文' },
-          ]}
-          style={{ width: 120 }}
-          suffixIcon={<TranslationOutlined />}
-        />
-      </div>
 
-      <div className="w-full  max-w-md rounded-lg bg-white p-8 shadow-xl">
+      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-xl">
+        <div className="mb-6 p-3 bg-blue-50 rounded-lg border border-blue-100 flex items-center justify-center">
+          <TranslationOutlined style={{ fontSize: '20px', color: '#3b82f6', marginRight: '12px' }} />
+          <span className="mr-3 font-medium text-gray-700">Choose Language:</span>
+          <Select
+            value={currentLang}
+            onChange={handleLanguageChange}
+            options={[
+              { value: 'en', label: 'English' },
+              { value: 'zh', label: '简体中文' },
+            ]}
+            style={{ width: 140 }}
+            size="large"
+            dropdownStyle={{ zIndex: 2000 }}
+          />
+        </div>
+        
         <h2 className="text-center text-2xl">{t('login')}</h2>
+        
         {authProviders.includes('email') &&
           <>
             {error && <Alert message={error} type="error" />}
