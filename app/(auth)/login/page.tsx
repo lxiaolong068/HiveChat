@@ -4,7 +4,8 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from 'next/link';
-import { Form, Input, Button, Alert } from 'antd';
+import { Form, Input, Button, Alert, Select } from 'antd';
+import { TranslationOutlined } from '@ant-design/icons';
 import logo from "@/app/images/logo.png";
 import Hivechat from "@/app/images/hivechat.svg";
 import FeishuLogin from "@/app/components/FeishuLoginButton"
@@ -29,6 +30,7 @@ export default function LoginPage() {
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
   const [authProviders, setAuthProviders] = useState<string[]>([]);
   const [error, setError] = useState("");
+  const [currentLang, setCurrentLang] = useState('en');
 
   async function handleSubmit(values: LoginFormValues) {
     setLoading(true);
@@ -47,6 +49,19 @@ export default function LoginPage() {
   }
 
   useEffect(() => {
+    // 获取当前语言设置
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return undefined;
+    };
+    
+    const savedLang = getCookie('language');
+    if (savedLang && ['zh', 'en'].includes(savedLang)) {
+      setCurrentLang(savedLang);
+    }
+    
     const fetchSettings = async () => {
       const resultValue = await fetchAppSettings('isRegistrationOpen');
       setIsRegistrationOpen(resultValue === 'true');
@@ -58,6 +73,11 @@ export default function LoginPage() {
     });
   }, []);
 
+  const handleLanguageChange = (value: string) => {
+    document.cookie = `language=${value}; path=/`;
+    window.location.reload();
+  };
+
   if (isFetching) {
     return (
       <main className="h-dvh flex justify-center items-center">
@@ -68,11 +88,25 @@ export default function LoginPage() {
   }
   return (
     <div className="flex flex-col min-h-screen items-center justify-center bg-slate-50">
-      <div className="flex items-center flex-row  mb-6">
+      <div className="flex items-center flex-row mb-6">
         <Link href="/" className='flex items-center'>
           <Image src={logo} className="ml-1" alt="HiveChat logo" width={32} height={32} />
           <Hivechat className="ml-1" alt="HiveChat text" width={156} height={39} />
         </Link>
+      </div>
+      
+      {/* 语言切换器 */}
+      <div className="absolute top-4 right-4">
+        <Select
+          value={currentLang}
+          onChange={handleLanguageChange}
+          options={[
+            { value: 'en', label: 'English' },
+            { value: 'zh', label: '简体中文' },
+          ]}
+          style={{ width: 120 }}
+          suffixIcon={<TranslationOutlined />}
+        />
       </div>
 
       <div className="w-full  max-w-md rounded-lg bg-white p-8 shadow-xl">
