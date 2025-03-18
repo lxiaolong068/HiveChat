@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react'
-import { Modal, Form, Input, Button, Alert, Skeleton } from 'antd';
+import { Modal, Form, Input, Button, Alert, Skeleton, Select, Divider } from 'antd';
 import { useLoginModal } from '@/app/contexts/loginModalContext';
 import { signIn } from "next-auth/react";
 import { fetchAppSettings } from '@/app/admin/system/actions';
@@ -16,6 +16,7 @@ import DingdingLogin from "@/app/components/DingdingLoginButton"
 import { useTranslations } from 'next-intl';
 import useModelListStore from '../store/modelList';
 import { fetchAvailableLlmModels } from '../adapter/actions';
+import { TranslationOutlined } from '@ant-design/icons';
 
 interface LoginFormValues {
   email: string;
@@ -32,7 +33,22 @@ export default function LoginModal() {
   const [authProviders, setAuthProviders] = useState<string[]>([]);
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
   const { initModelList, setCurrentModel, initAllProviderList } = useModelListStore();
+  const [currentLang, setCurrentLang] = useState('en');
+
   useEffect(() => {
+    // 获取当前语言设置
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return undefined;
+    };
+    
+    const savedLang = getCookie('language');
+    if (savedLang && ['zh', 'en'].includes(savedLang)) {
+      setCurrentLang(savedLang);
+    }
+
     const fetchSettings = async () => {
       const resultValue = await fetchAppSettings('isRegistrationOpen');
       setIsRegistrationOpen(resultValue === 'true');
@@ -42,6 +58,11 @@ export default function LoginModal() {
     }
     fetchSettings();
   }, []);
+
+  const handleLanguageChange = (value: string) => {
+    document.cookie = `language=${value}; path=/`;
+    window.location.reload();
+  };
 
   async function handleSubmit(values: LoginFormValues) {
     setLoading(true);
@@ -82,11 +103,32 @@ export default function LoginModal() {
       keyboard={false}
       width={420}
     >
-      <div className="flex items-center justify-center flex-row mb-6 mt-4">
+      <div className="flex items-center justify-center flex-row mb-4 mt-4">
         <Image src={logo} className="ml-1" alt="HiveChat logo" width={28} height={28} />
         <Hivechat className="ml-1" alt="HiveChat text" width={120} />
         <span className="text-center text-xl">{t('login')}</span>
       </div>
+
+      {/* 添加醒目的语言切换器 */}
+      <div className="px-4 mb-5">
+        <div className="p-2 bg-blue-50 rounded-lg border border-blue-100 flex items-center justify-between">
+          <div className="flex items-center">
+            <TranslationOutlined style={{ fontSize: '16px', color: '#3b82f6', marginRight: '8px' }} />
+            <span className="text-sm font-medium text-gray-700">Language:</span>
+          </div>
+          <Select
+            value={currentLang}
+            onChange={handleLanguageChange}
+            options={[
+              { value: 'en', label: 'English' },
+              { value: 'zh', label: '简体中文' },
+            ]}
+            style={{ width: 120 }}
+            size="middle"
+          />
+        </div>
+      </div>
+      
       {isPending ? <div className='mt-4 mb-6'>
         <Skeleton title={false} active paragraph={{ rows: 3 }} />
       </div> : <>
